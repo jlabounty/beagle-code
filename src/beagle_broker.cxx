@@ -15,7 +15,6 @@ October 2016
 #include <map>
 #include <vector>
 #include <string>
-#include <regex>
 #include <stdexcept>
 #include <cstdio>
 #include <cassert>
@@ -64,9 +63,7 @@ int main() {
   std::vector<zmq::pollitem_t> pollitems;
   zmq::socket_t router(ctxt, ZMQ_ROUTER);
   router.bind("tcp://*:6669");
-  pollitems.push_back({});
-  pollitems.back().socket = (void*)router;
-  pollitems.back().events = ZMQ_POLLIN;
+  pollitems.push_back({(void*) router, 0, ZMQ_POLLIN, 0});
 
   std::vector<std::string> dealerSockNames = {"spi1", "spi2"};
   is_master = true;
@@ -87,7 +84,7 @@ int main() {
   // important to reserve dealer pollitems in advance
   // or reventsp will not work correctly
   pollitems.reserve(1 + dealerSockNames.size());
-  std::map<std::string, pollsock> dealers;
+  std::map<std::string, std::shared_ptr<pollsock>> dealers;
   for (const auto& newName : dealerSockNames) {
     zmq::socket_t newDealer(ctxt, ZMQ_DEALER);
     std::string addrstr;
@@ -101,18 +98,20 @@ int main() {
 
     std::cout << addrstr << std::endl;
 
-    pollitems.push_back({});
-    pollitems.back().socket = (void*)newDealer;
-    pollitems.back().events = ZMQ_POLLIN;
-    dealers.emplace(
-        newName, pollsock{std::move(newDealer), &(pollitems.back().revents)});
+    pollitems.push_back({(void*)newDealer, 0, ZMQ_POLLIN, 0});
+    // pollitems.back().socket = 
+    // pollitems.back().events = ZMQ_POLLIN;
+    auto newPair = std::make_pair(newName, std::make_shared<pollsock>(pollsock{std::move(newDealer),  &(pollitems.back().revents)}));
+    // newPair.second->sock = std::move(newDealer);
+    // newPair.second->reventsp = &(pollitems.back().revents);
+    dealers.insert(std::move(newPair));
   }
 
   // start polling
   std::cout << "begin polling loop" << std::endl;
   while (true) {
     std::cout << "polling" << std::endl;
-    zmq::poll(pollitems);
+    zmq::poll(pollitems.data(), pollitems.size(), -1);
 
     // check if there's a message on the router
     if (pollitems[0].revents & ZMQ_POLLIN) {
@@ -168,7 +167,7 @@ int main() {
                   << std::string(dealermsg.data<char>(), dealermsg.size())
                   << std::endl;
         mmsg.add(std::move(dealermsg));
-        mmsg.send(dealeriter->second.sock);
+        mmsg.send(dealeriter->second->sock);
       } else {
         std::cout << "dealer msg: "
                   << std::string(dealermsg.data<char>(), dealermsg.size())
@@ -179,10 +178,10 @@ int main() {
     } else {
       // search all dealers for messages
       for (auto& psockpair : dealers) {
-        if (*(psockpair.second.reventsp) & ZMQ_POLLIN) {
+        if (*(psockpair.second->reventsp) & ZMQ_POLLIN) {
           std::cout << "message ready on " << psockpair.first << std::endl;
           // just send it straight through the router
-          zmq::multipart_t(psockpair.second.sock).send(router);
+          zmq::multipart_t(psockpair.second->sock).send(router);
         }
       }
     }
@@ -195,8 +194,7 @@ int main() {
 std::vector<unsigned int> getip() {
   char buffer[128];
   std::string ipstr;
-  //  std::shared_ptr<FILE> pipe(popen("ipconfig getifaddr en0", "r"), pclose);
-  std::shared_ptr<FILE> pipe(popen("ifconfig en0", "r"), pclose);
+  std::shared_ptr<FILE> pipe(popen("./getIp.sh", "r"), pclose);
   if (!pipe) {
     throw std::runtime_error("popen() failed!");
   }
@@ -206,20 +204,17 @@ std::vector<unsigned int> getip() {
     }
   }
 
-  // use regex to parse ip address
-  std::regex ipregex("(\\d+).(\\d+)\\.(\\d+)\\.(\\d+)\n");
-  // std::regex ipregex("(192).(168)\\.(\\d+)\\.(\\d+)");
-  std::smatch ipmatch;
-  std::vector<unsigned int> ipaddr;
-  if (std::regex_search(ipstr, ipmatch, ipregex)) {
-    for (unsigned int i = 1; i < ipmatch.size(); ++i) {
-      ipaddr.push_back(atoi(ipmatch[i].str().c_str()));
-    }
-  } else {
-    throw std::runtime_error("failed to match ip address with regex!");
+  std::vector<unsigned int> out;
+  auto iter = ipstr.cbegin();
+  while (iter != ipstr.cend()) {
+      auto numstr = peel_word(ipstr, iter, '.');
+      out.push_back(atoi(numstr.c_str()));
   }
 
-  return ipaddr;
+    if (out.size() != 4){
+      throw std::runtime_error("getIp.sh returned invalid ip address!");
+    }
+    return out;
 }
 
 std::string peel_word(const std::string& str,

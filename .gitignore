@@ -1,3 +1,7 @@
 *ipc
 *pyc
 beagle_broker
+*~
+.#*
+src/#*
+#*
