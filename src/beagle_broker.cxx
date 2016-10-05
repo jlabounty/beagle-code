@@ -63,7 +63,7 @@ int main() {
   std::vector<zmq::pollitem_t> pollitems;
   zmq::socket_t router(ctxt, ZMQ_ROUTER);
   router.bind("tcp://*:6669");
-  pollitems.push_back({(void*) router, 0, ZMQ_POLLIN, 0});
+  pollitems.push_back({(void*)router, 0, ZMQ_POLLIN, 0});
 
   std::vector<std::string> dealerSockNames = {"spi1", "spi2"};
   is_master = true;
@@ -99,9 +99,11 @@ int main() {
     std::cout << addrstr << std::endl;
 
     pollitems.push_back({(void*)newDealer, 0, ZMQ_POLLIN, 0});
-    // pollitems.back().socket = 
+    // pollitems.back().socket =
     // pollitems.back().events = ZMQ_POLLIN;
-    auto newPair = std::make_pair(newName, std::make_shared<pollsock>(pollsock{std::move(newDealer),  &(pollitems.back().revents)}));
+    auto newPair = std::make_pair(
+        newName, std::make_shared<pollsock>(pollsock{
+                     std::move(newDealer), &(pollitems.back().revents)}));
     // newPair.second->sock = std::move(newDealer);
     // newPair.second->reventsp = &(pollitems.back().revents);
     dealers.insert(std::move(newPair));
@@ -207,14 +209,14 @@ std::vector<unsigned int> getip() {
   std::vector<unsigned int> out;
   auto iter = ipstr.cbegin();
   while (iter != ipstr.cend()) {
-      auto numstr = peel_word(ipstr, iter, '.');
-      out.push_back(atoi(numstr.c_str()));
+    auto numstr = peel_word(ipstr, iter, '.');
+    out.push_back(atoi(numstr.c_str()));
   }
 
-    if (out.size() != 4){
-      throw std::runtime_error("getIp.sh returned invalid ip address!");
-    }
-    return out;
+  if (out.size() != 4) {
+    throw std::runtime_error("getIp.sh returned invalid ip address!");
+  }
+  return out;
 }
 
 std::string peel_word(const std::string& str,
