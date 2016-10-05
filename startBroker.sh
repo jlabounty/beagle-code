@@ -1,7 +1,9 @@
 #!/bin/bash
 #
 start() {
-	./beagle_broker &
+    pushd /home/g-2/beagle-code
+    ./beagle_broker &
+    popd
 }
 
 ps auxw | grep beagle_broker | grep -v grep && echo already running! || start
