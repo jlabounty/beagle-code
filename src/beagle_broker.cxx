@@ -66,7 +66,6 @@ int main() {
   pollitems.push_back({(void*)router, 0, ZMQ_POLLIN, 0});
 
   std::vector<std::string> dealerSockNames = {"spi1", "spi2"};
-  is_master = true;
   assert(system("./killallworkers.sh") == 0);
   if (is_master) {
     dealerSockNames.push_back("bk1");
@@ -110,7 +109,6 @@ int main() {
   }
 
   // start polling
-  std::cout << "begin polling loop" << std::endl;
   while (true) {
     std::cout << "polling" << std::endl;
     zmq::poll(pollitems.data(), pollitems.size(), -1);
