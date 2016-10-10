@@ -99,7 +99,7 @@ def handle_bk_message(serial_port, handler_map, message):
 	command_list = message.strip().split()
 	if command_list[0] in handler_map:
 		try:
-			return handler_map[message](serial_port, *command_list[1:])
+			return handler_map[command_list[0]](serial_port, *command_list[1:])
 		except (TypeError, ValueError):
 			return 'invalid bk command'
 	else:
