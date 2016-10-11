@@ -63,6 +63,10 @@ def read_handler(serial_port, read_command):
 		return read_current_limit(serial_port)
 	elif read_command == 'serialno':
 		return read_serial(serial_port)
+        elif read_command == 'output':
+            return read_output_stat(serial_port)
+        else:
+            return 'unrecognized bk read'
 
 def set_handler(serial_port, set_command, value):
 	fvalue = None
@@ -72,10 +76,10 @@ def set_handler(serial_port, set_command, value):
 		return 'invalid bk parameter'
 	if set_command == 'voltage':
 		return set_voltage(serial_port, fvalue)
-	elif set_command == 'currlim':
+	elif set_command == 'current':
 		return set_current_limit(serial_port, fvalue)
 	else:
-		return 'unrecognized bk command'
+		return 'unrecognized bk set'
 
 def measure_handler(serial_port, measure_command):
 	if measure_command == 'voltage':
@@ -83,7 +87,7 @@ def measure_handler(serial_port, measure_command):
 	elif measure_command == 'current':
 		return measure_current(serial_port)
 	else:
-		return 'unrecognized bk command'
+		return 'unrecognized bk measure'
 
 def power_handler(serial_port, power_command):
 	if power_command == 'on':
@@ -102,8 +106,7 @@ def handle_bk_message(serial_port, handler_map, message):
 		except (TypeError, ValueError):
 			return 'invalid bk command'
 	else:
-		return 'unrecognized bk command'
-#	return message + ': from bkworker'
+		return 'unrecognized bk power'
 
 def main():
 	if len(sys.argv) != 2:		
@@ -119,16 +122,21 @@ def main():
 			sys.exit(0)
 	# logic to check if serial port can be opened goes here
 	bk_serial = None
+        try:
+            bk_serial = Serial('/dev/bk%i' % bknum, 4800, timeout=0.5)
+        except:
+            bk_serial = None
 
-	workerstartup('bkworker%i' % bknum)
-
-	handler_map = {}
-	handler_map['read'] = read_handler
-	handler_map['set'] = set_handler
-	handler_map['measure'] = measure_handler
-	handler_map['power'] = power_handler
-
-	work('bk%i' % bknum, partial(handle_bk_message, bk_serial, handler_map))
+        workerstartup('bkworker%i' % bknum)
+        if bk_serial is not None:
+            handler_map = {}
+            handler_map['read'] = read_handler
+            handler_map['set'] = set_handler
+            handler_map['measure'] = measure_handler
+            handler_map['power'] = power_handler
+            work('bk%i' % bknum, partial(handle_bk_message, bk_serial, handler_map))
+        else:
+            work('bk%i' % bknum, lambda x: 'bk %i is not connected' % bknum)
 	
 if __name__ == "__main__":
     main()
