@@ -25,14 +25,14 @@ def bk_write(serial_port, write_command, read_command):
 	serial_port.write(write_command)
 	return bk_read(serial_port, read_command)
 
-def read_serial(serial_port, bk_command):
+def read_serial(serial_port):
 	return bk_read(serial_port, '*IDN?\n')
 
 def read_output_stat(serial_port): 
 	return bk_read(serial_port, 'OUTP:STAT?\n')
 
 def read_voltage_setpt(serial_port):
-	return bk_read(serial_port, 'SOUR:VOlT?\n')
+	return bk_read(serial_port, 'SOUR:VOLT?\n')
 
 def read_current_limit(serial_port):
 	return bk_read(serial_port, 'SOUR:CURR?\n')
@@ -50,12 +50,11 @@ def power_off(serial_port):
 	return bk_write(serial_port, 'OUTP:STAT 0\n', 'OUTP:STAT?\n')
 
 def set_voltage(serial_port, voltage):
-	# do we need bounds checking?
-	return bk_write(serial_port, 'SOUR:VOLT %.3f\n' % voltage, 'SOUR_VOLT?\n')
+	return bk_write(serial_port, 'SOUR:VOLT %.3f\n' % voltage, 'SOUR:VOLT?\n')
 
 def set_current_limit(serial_port, currlim):
-	# do we need vounds checking?
-	bk_write(serial_port, 'SOUR:CURR %.3f\n' % currlim, 'SOUR:CURR?\n')
+	# do we need bounds checking?
+	return bk_write(serial_port, 'SOUR:CURR %.5f\n' % currlim, 'SOUR:CURR?\n')
 
 def read_handler(serial_port, read_command):
 	if read_command == 'voltage':
