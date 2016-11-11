@@ -98,7 +98,6 @@ def power_handler(serial_port, power_command):
 		return 'unrecognized bk command'
 
 def handle_bk_message(serial_port, handler_map, message):
-	# does nothing for now
 	command_list = message.strip().split()
 	if command_list[0] in handler_map:
 		try:
@@ -106,7 +105,7 @@ def handle_bk_message(serial_port, handler_map, message):
 		except (TypeError, ValueError):
 			return 'invalid bk command'
 	else:
-		return 'unrecognized bk power'
+		return 'unrecognized bk command'
 
 def main():
 	if len(sys.argv) != 2:		

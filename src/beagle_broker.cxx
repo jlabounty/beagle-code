@@ -66,17 +66,14 @@ int main() {
   pollitems.push_back({(void*)router, 0, ZMQ_POLLIN, 0});
 
   std::vector<std::string> dealerSockNames = {"spi1", "spi2"};
-  assert(system("./killallworkers.sh") == 0);
   if (is_master) {
     dealerSockNames.push_back("bk1");
     dealerSockNames.push_back("bk2");
     dealerSockNames.push_back("bk3");
     dealerSockNames.push_back("bk4");
     dealerSockNames.push_back("slave");
-    assert(system("./startMasterWorkers.sh") == 0);
   } else {
     dealerSockNames.push_back("filter");
-    assert(system("./startSlaveWorkers.sh") == 0);
   }
 
   // prepare all dealer sockets
