@@ -7,7 +7,7 @@ from sipmspi import SipmSPI
 from functools import partial
 from worker_common import workerstartup, work
 
-PINS = [{'sipmpins': [11, 12, 13, 14], 'chippins': [15, 16]}, {'sipmpins': [45, 45, 45, 45], 'chippins': [45,45]}]
+PINS = [{'sipmpins': [11, 12, 13, 14], 'chippins': [15, 16]}, {'sipmpins': [23, 24, 25, 26], 'chippins': [41, 42]}]
 
 sipmspi = None
 
@@ -40,10 +40,10 @@ def sipm_control(sipmspi, message):
             return 'ERROR: invalid chip selection'
 
     if chip == 'temp':
-        sipmspi.chip_select(chip)
+        sipmspi.chip_select('temp')
         return sipmspi.read_temperature()
 
-    if chip == 'mem':
+    elif chip == 'mem':
         sipmspi.chip_select('mem')
         return sipmspi.read_eeprom_page(1)
 
