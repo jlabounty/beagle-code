@@ -82,7 +82,7 @@ def main():
             print 'error! [spinum] must be 1 or 2!'
             sys.exit(0)
     workerstartup('spiworker%i' % spinum)
-    sipmspi = SipmSPI(spinum, **PINS[spinum])
+    sipmspi = SipmSPI(spinum, **PINS[spinum - 1])
     work('spi%i' % spinum, partial(sipm_control, sipmspi))
     
 if __name__ == '__main__':
