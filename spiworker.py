@@ -45,7 +45,8 @@ def sipm_control(sipmspi, message):
 
     elif chip == 'mem':
         sipmspi.chip_select('mem')
-        return sipmspi.read_eeprom_page(1)
+        memstr = sipmspi.read_eeprom_page(1)
+        return memstr if memstr is not None else ''
 
     elif chip == 'gain':
         sipmspi.chip_select('pga')
