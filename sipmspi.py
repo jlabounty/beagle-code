@@ -86,7 +86,7 @@ class SipmSPI:
 		int_array = res[2:]
 		#utf8 safety
 		chr_array = [ ' ' if i==255 else chr(i) for i in int_array]
-		print(''.join(chr_array))
+		return ''.join(chr_array)
 
 	def write_eeprom_page(self, page, msg):
 		page <<= 4
