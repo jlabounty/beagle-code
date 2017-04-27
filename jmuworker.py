@@ -25,7 +25,7 @@ def process_message_filter(message):
 
 
 def main():
-	workerstartup('jmuworker')
+	workerstartup('jmupowersupplyworker')
 	work('jmu', process_message_filter)
 	
 if __name__ == "__main__":
