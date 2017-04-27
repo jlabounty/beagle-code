@@ -1,4 +1,4 @@
-˘# Worker for handling control of a thor labs filter wheel
+# Worker for handling control of a thor labs filter wheel
 # Aaron Fienberg
 # October 2016
 
@@ -26,7 +26,7 @@ def main():
     workerstartup('jmupowersupplyworker')
     GPIO.setup("P8_10", GPIO.OUT)
     GPIO.output("P8_10", GPIO.HIGH)
-	work('jmu', process_message_filter)
+    work('jmu', process_message_filter)
 	
 if __name__ == "__main__":
     main()
