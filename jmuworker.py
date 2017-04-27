@@ -3,9 +3,7 @@
 # October 2016
 
 from worker_common import workerstartup, work
-
 import Adafruit_BBIO.GPIO as GPIO
-GPIO.setup("P8_10", GPIO.OUT)
 
 
 def process_message_filter(message):
@@ -26,6 +24,7 @@ def process_message_filter(message):
 
 def main():
 	workerstartup('jmupowersupplyworker')
+    GPIO.setup("P8_10", GPIO.OUT)
 	work('jmu', process_message_filter)
 	
 if __name__ == "__main__":
