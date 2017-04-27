@@ -71,6 +71,7 @@ int main() {
     dealerSockNames.push_back("bk2");
     dealerSockNames.push_back("bk3");
     dealerSockNames.push_back("bk4");
+    dealerSockNames.push_back("jmu");
     dealerSockNames.push_back("slave");
   } else {
     dealerSockNames.push_back("filter");
@@ -149,6 +150,9 @@ int main() {
           dealername = "filter";
           dealermsg = zmq::message_t(past_first_iter, msgstr.cend());
         }
+      } else {
+        dealername = first_word;
+        dealermsg = zmq::message_t(past_first_iter, msgstr.cend());
       }
 
       // done figuring, send message through appropriate dealer socket
