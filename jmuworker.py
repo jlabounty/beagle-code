@@ -15,9 +15,10 @@ def process_message_filter(message):
     except:
         return 'invalid message'
     if message == 'on':
-        GPIO.setup("P8_10", GPIO.OUT)
+        GPIO.output("P8_10", GPIO.HIGH)
         return 'turned on'
     elif message == 'off':
+        GPIO.output("P8_10", GPIO.LOW)
         return 'turned off'
     else:
         return 'invalid message'
