@@ -25,6 +25,7 @@ def process_message_filter(message):
 def main():
 	workerstartup('jmupowersupplyworker')
     GPIO.setup("P8_10", GPIO.OUT)
+    GPIO.output("P8_10", GPIO.HIGH)
 	work('jmu', process_message_filter)
 	
 if __name__ == "__main__":
