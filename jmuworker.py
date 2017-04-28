@@ -1,12 +1,12 @@
-# Worker for handling control of a thor labs filter wheel
+# Worker for handling control of jmu power supply
 # Aaron Fienberg
-# October 2016
+# April 2017
 
 from worker_common import workerstartup, work
 import Adafruit_BBIO.GPIO as GPIO
 
 
-def process_message_filter(message):
+def process_message_jmu(message):
     command = None
     try:
         command = message.strip().split()[0]
@@ -26,7 +26,8 @@ def main():
     workerstartup('jmupowersupplyworker')
     GPIO.setup("P8_10", GPIO.OUT)
     GPIO.output("P8_10", GPIO.HIGH)
-    work('jmu', process_message_filter)
+    work('jmu', process_message_jmu)
 	
+    
 if __name__ == "__main__":
     main()
