@@ -79,6 +79,7 @@ int main() {
 
   // special case for T0 beagle
   if (ipaddr.back() == 23) {
+    dealerSockNames.push_back("bk1");
     dealerSockNames.push_back("caenHV");
   }
 
