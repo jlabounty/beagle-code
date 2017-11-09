@@ -56,7 +56,12 @@ def turn_off(caen, chan_num):
 
 def read_status(caen, chan_num):
     caen.write('$BD:00,CMD:MON,CH:{},PAR:STAT\r\n'.format(chan_num))
-    return read_response(caen)
+    resp = read_response(caen)
+    search = val_reg.search(resp)
+    if search:
+        return search.groups()[0]
+    else:
+        return 'fail'
 
 
 def set_voltage(caen, chan_num, voltage):
