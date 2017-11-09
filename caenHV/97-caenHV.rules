@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEMS=="usb-serial", DRIVERS=="ftdi_sio", KERNEL=="ttyUSB*", SYMLINK+="caenHV", MODE="0666"

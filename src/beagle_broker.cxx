@@ -77,6 +77,11 @@ int main() {
     dealerSockNames.push_back("filter");
   }
 
+  // special case for T0 beagle
+  if (ipaddr.back() == 23) {
+    dealerSockNames.push_back("caenHV");
+  }
+
   // prepare all dealer sockets
   // important to reserve dealer pollitems in advance
   // or reventsp will not work correctly
