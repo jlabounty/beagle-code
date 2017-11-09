@@ -13,7 +13,7 @@ def handle_caen_mesasge(caen, handler_map, message):
     command_list = message.strip().split()
     if command_list[0] in handler_map:
         try:
-            return handler_map[command_list[0]](serial_port, *command_list[1:])
+            return handler_map[command_list[0]](caen, *command_list[1:])
         except (TypeError, ValueError):
             return 'invalid caen command'
     else:
@@ -23,14 +23,20 @@ def handle_caen_mesasge(caen, handler_map, message):
 def main():
     caen = None
     try:
-        open_caen_port('/dev/caenHV')
+        caen = open_caen_port('/dev/caenHV')
     except:
         pass
 
-    workerstartup('caenHV')
+    workerstartup('caenHVworkerproc')
     if caen is not None:
         handler_map = {}
-        handler_map['setpt'] = read_voltage
+        handler_map['readvolt'] = read_voltage
+        handler_map['readcurr'] = read_current
+        handler_map['setvolt'] = set_voltage
+        handler_map['getid'] = get_id
+        handler_map['turnon'] = turn_on
+        handler_map['turnoff'] = turn_on
+        handler_map['stat'] read_status
         work('caenHV', partial(handle_caen_mesasge, caen, handler_map))
     else:
         work('caenHV', lambda x: 'caenHV module is not connected')

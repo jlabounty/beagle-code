@@ -3,8 +3,10 @@ import serial
 
 val_reg = re.compile('BD:00,CMD:OK,VAL:([\\w .]+)')
 
+
 def open_caen_port(path):
     return serial.Serial(path, 9600, timeout=1, xonxoff=True)
+
 
 def read_response(caen):
     response = ''
@@ -13,15 +15,27 @@ def read_response(caen):
         if new_char == '':
             return 'failed serial read'
         else:
-            response += new_char    
+            response += new_char
     return response[:-2]
+
 
 def get_id(caen):
     caen.write('$BD:00,CMD:MON,PAR:BDNAME\r\n')
     return read_response(caen)
 
+
 def read_voltage(caen, chan_num):
     caen.write('$BD:00,CMD:MON,CH:{},PAR:VSET\r\n'.format(chan_num))
+    resp = read_response(caen)
+    search = val_reg.search(resp)
+    if search:
+        return search.groups()[0]
+    else:
+        return 'fail'
+
+
+def read_current(caen, chan_num):
+    caen.write('$BD:00,CMD:MON,CH:{},PAR:IMON\r\n'.format(chan_num))
     resp = read_response(caen)
     search = val_reg.search(resp)
     if search:
@@ -46,5 +60,6 @@ def read_status(caen, chan_num):
 
 
 def set_voltage(caen, chan_num, voltage):
-    caen.write('$BD:00,CMD:SET,CH:{0},PAR:VSET,VAL:{1:.1f}\r\n'.format(chan_num, voltage))
+    caen.write('$BD:00,CMD:SET,CH:{0},PAR:VSET,VAL:{1:.1f}\r\n'.format(
+        chan_num, voltage))
     return(read_response(caen))
