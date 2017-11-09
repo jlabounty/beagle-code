@@ -35,8 +35,8 @@ def main():
         handler_map['setvolt'] = set_voltage
         handler_map['getid'] = get_id
         handler_map['turnon'] = turn_on
-        handler_map['turnoff'] = turn_on
-        handler_map['stat'] read_status
+        handler_map['turnoff'] = turn_off
+        handler_map['stat'] = read_status
         work('caenHV', partial(handle_caen_mesasge, caen, handler_map))
     else:
         work('caenHV', lambda x: 'caenHV module is not connected')

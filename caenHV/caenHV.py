@@ -60,6 +60,7 @@ def read_status(caen, chan_num):
 
 
 def set_voltage(caen, chan_num, voltage):
+    voltage = float(voltage)
     caen.write('$BD:00,CMD:SET,CH:{0},PAR:VSET,VAL:{1:.1f}\r\n'.format(
         chan_num, voltage))
     return(read_response(caen))
