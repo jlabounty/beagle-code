@@ -21,6 +21,7 @@ class SipmSPI:
 		for pin in self.sipmpins + self.chippins:
 			GPIO.setup(pin, GPIO.OUT)
 			GPIO.output(pin, GPIO.LOW)
+		self.sipm_number = -1
 
 	def select_sipm(self, sipm_number):
 		for idx, pin_name in enumerate(self.sipmpins):
@@ -29,6 +30,7 @@ class SipmSPI:
 			else:
 				GPIO.output(pin_name, GPIO.LOW)
         #print("sipm %d selected" % sipm_number)
+		self.sipm_number = sipm_number
 
 	def chip_select(self, key):
 		chip_num = CHIP_MAP[key]
@@ -57,10 +59,39 @@ class SipmSPI:
 #		time.sleep(0.2)
 
 	def read_temperature(self):
-		res = self.spi.xfer2([0x50, 0x00, 0x00])
-		#temp = (res[1] << 5 | res[2] >> 3) / 16.0
-		temp = (res[1] << 8 | res[2]) / 128.0
-		#print("temp: %f deg C" % temp)
+		#determine if this sipms temperature has been read in the last X minutes. For simplicity, 2 minutes maybe?
+		deltaT = 2*60 
+		tempReadRecently = False
+		timeNow = float(time.time()) #unix time in seconds.
+		try: #open the file for this sipm, read out the values
+			with open("./sipm_"+str(self.sipm_number)+"_temperatures.txt", "r") as fh:
+				for line in fh:
+					pass
+				last = line.split(" ")
+			previousTime = float(last[0])
+			previousTemperature = float(last[1])
+
+			#if the time since this file was created is greater than our cutoff, read the temperature again. 
+			timeDiff = timeNow - previousTime
+			#print(timeNow, previousTime, timeDiff)
+			if(timeDiff < deltaT):
+				tempReadRecently = True
+		except:
+			#unable to read file. Assume temperature not read recently.
+			tempReadRecently = False
+		if(tempReadRecently):
+			#return the previous value
+			temp = previousTemperature
+		else:
+			#read the temperature again
+			res = self.spi.xfer2([0x50, 0x00, 0x00])
+			#temp = (res[1] << 5 | res[2] >> 3) / 16.0
+			temp = (res[1] << 8 | res[2]) / 128.0
+			#print("temp: %f deg C" % temp)
+			
+			#append the time/value to the file for this sipm
+			with open("./sipm_"+str(sipm_number)+"_temperatures.txt", "w") as fh:
+        		fh.write(str(timeNow)+str(" ")+str(temp))
 		return str(temp)
 
 	def read_gain(self):
